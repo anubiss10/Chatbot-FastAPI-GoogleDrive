@@ -1,0 +1,4 @@
+# Excluir el archivo credentials.json
+credentials.json
+service_account.json
+token.json
