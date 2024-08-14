@@ -23,18 +23,33 @@ class GoogleDriveManager:
     def authenticate(self):
         """Authenticates with Google Drive API."""
         if os.path.exists(self.token_path):
+            # Load existing credentials
             self.creds = Credentials.from_authorized_user_file(self.token_path, self.scopes)
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
+                # Refresh the credentials if expired
+                try:
+                    self.creds.refresh(Request())
+                    with open(self.token_path, "w") as token:
+                        token.write(self.creds.to_json())
+                except Exception as e:
+                    logging.error(f"Failed to refresh credentials: {e}")
+                    self._obtain_new_credentials()
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.credentials_path, self.scopes
-                )
-                self.creds = flow.run_local_server(port=0)
+                self._obtain_new_credentials()
+
+    def _obtain_new_credentials(self):
+        """Obtain new credentials from the OAuth 2.0 flow."""
+        try:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                self.credentials_path, self.scopes
+            )
+            self.creds = flow.run_local_server(port=0)
             with open(self.token_path, "w") as token:
                 token.write(self.creds.to_json())
-        print("Authentication successful!")
+        except Exception as e:
+            logging.error(f"Failed to obtain new credentials: {e}")
+            raise HTTPException(status_code=500, detail="Failed to authenticate with Google Drive")
 
     async def upload_file(self, file_content: io.BytesIO, folder_id: str, file_name: str):
         """Uploads a file to Google Drive."""
