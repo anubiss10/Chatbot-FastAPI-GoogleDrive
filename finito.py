@@ -7,6 +7,8 @@ from pydantic import BaseModel
 import logging
 import aiohttp
 from google_drive_upload import GoogleDriveManager
+from dotenv import load_dotenv
+import os
 app = FastAPI()
 
 class WebhookChallenge(BaseModel):
@@ -14,8 +16,8 @@ class WebhookChallenge(BaseModel):
     hub_challenge: str
     hub_verify_token: str
 
-VERIFY_TOKEN = "12345"
-TOKENADMIN = "EAALRJqqqhLsBO6NvpJoo06WLjXJrSdxdeL4Nj4YgQrSkg96YfwOE79oPkXnj5r9aKY7Lryyw2hjXVz2EKZBDYhOKMOA31EuE8CdeseYkeFZARXGuKgAs0GAywg8lstN4jj7osnIojeKi5ve30YZBJQNfhWtErqTiTXKhMyPJ7t1G39ZAA1LIb2QuMJxZAZBGstcods8fuPX63zfD1qHrsZD"
+VERIFY_TOKEN = os.getenv('VERIFY_TOKEN')
+TOKENADMIN = os.getenv('TOKEN_ADMIN')
 # Crear una instancia de GoogleDriveManager
 SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly",
           "https://www.googleapis.com/auth/drive.file"]
